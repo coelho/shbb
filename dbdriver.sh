@@ -74,7 +74,7 @@ db_delete_one() {
 	local value=$3
 	local uuid=""
 	if [[ $index != "uuid" ]]; then
-		uuid=$(head -n 1 "$DB_PATH/$collection/idx/$index/$value" 2>/dev/null)
+		uuid=$(tail -n 1 "$DB_PATH/$collection/idx/$index/$value" 2>/dev/null)
 	fi
 	if [ -z $uuid ]; then
 		return 1
@@ -110,7 +110,7 @@ db_select_one() {
 	local value=$3
 	local uuid=""
 	if [[ $index != "uuid" ]]; then
-		uuid=$(head -n 1 "$DB_PATH/$collection/idx/$index/$value" 2>/dev/null)
+		uuid=$(tail -n 1 "$DB_PATH/$collection/idx/$index/$value" 2>/dev/null)
 	fi
 	if [ -z $uuid ]; then
 		return 1
