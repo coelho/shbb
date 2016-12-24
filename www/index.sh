@@ -1,3 +1,4 @@
+source ./dbutil.sh
 source ./httputil.sh
 
 echo $request_type
