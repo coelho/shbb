@@ -1,5 +1,4 @@
-Forums software written in Bash
-Goal is to write everything we can in Bash! :)
+Forums software. Goal is to write everything we can in Bash! :)
 
 Probably not secure
 
