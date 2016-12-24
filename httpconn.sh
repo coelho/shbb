@@ -2,7 +2,6 @@ HTTP_PATH=$1
 HTTP_REMOTE_IP=$TCPREMOTEIP
 
 declare -r request_uuid=`uuidgen`
-mkdir -p /tmp/shbb/$request_uuid
 declare -r request_tmp="/tmp/shbb/$request_uuid"
 declare -r request_tmp_body="$request_tmp/body"
 declare -r request_tmp_to_source="$request_tmp/to_source"
@@ -20,6 +19,11 @@ declare -a response_codes=(
 	[405]="Method Not Allowed"
 	[500]="Internal Server Error"
 )
+
+tmp_make() {
+	mkdir -p "$request_tmp"
+	trap tmp_rm EXIT
+}
 
 tmp_rm() {
 	rm -rf "$request_tmp"
@@ -122,6 +126,7 @@ serve_file() {
 	done
 	if [[ "$serve_file" == *".sh" ]]; then
 		response_headers["Content-Type"]="text/html"
+		tmp_make
 		HTTP_REMOTE_IP=$HTTP_REMOTE_IP 							\
 		HTTP_PATH=$serve_file 									\
 		HTTP_REQUEST_TYPE=$request_type							\
@@ -161,6 +166,5 @@ serve_error_verbose() {
 	serve_error $response_code
 }
 
-trap tmp_rm EXIT
 read_request_headers
 serve
