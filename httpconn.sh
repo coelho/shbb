@@ -8,6 +8,7 @@ declare -r request_tmp_to_source="$request_tmp/to_source"
 
 declare request_type
 declare request_url
+declare -A request_url_params
 declare request_http_version
 declare -A request_headers
 declare -A response_headers
@@ -44,7 +45,7 @@ read_request_headers() {
 	if [[ "$line" =~ ^([A-Z]*)[[:space:]](.*)[[:space:]]([a-zA-Z0-9/\.]*)$ ]]; then
 		request_type=${BASH_REMATCH[1]}
 		request_url=${BASH_REMATCH[2]}
-		request_url=${request_url//[^a-zA-Z0-9_~\-\.\/?=]/}
+		request_url=${request_url//[^a-zA-Z0-9_~\-\.\/\?&=]/}
 		if [ $request_url == *".."* ]; then
 			serve_error 400
 			exit 0
@@ -53,6 +54,15 @@ read_request_headers() {
 	else
 		serve_error 400
 		exit 0
+	fi
+	if [[ $request_url =~ ^(.*)\?(.*)$ ]]; then
+		request_url=${BASH_REMATCH[1]}
+		local params=${BASH_REMATCH[2]}
+		for i in ${params//&/ }; do
+			if [[ "$i" =~ ^(.*)=(.*)$ ]]; then
+				request_url_params[${BASH_REMATCH[1]}]=${BASH_REMATCH[2]}
+			fi
+		done
 	fi
 	while true; do
 		# FIXME: sanity limits on how many headers we accept
@@ -127,13 +137,15 @@ serve_file() {
 	if [[ "$serve_file" == *".sh" ]]; then
 		response_headers["Content-Type"]="text/html"
 		tmp_make
-		HTTP_REMOTE_IP=$HTTP_REMOTE_IP 							\
-		HTTP_PATH=$serve_file 									\
-		HTTP_REQUEST_TYPE=$request_type							\
-		HTTP_REQUEST_VERSION=$request_http_version				\
-		HTTP_REQUEST_HEADERS=$(declare -p request_headers)	 	\
-		HTTP_RESPONSE_HEADERS=$(declare -p response_headers)	\
-			$SHELL "$serve_file" > "$request_tmp_body"			\
+		HTTP_REMOTE_IP=$HTTP_REMOTE_IP 								\
+		HTTP_PATH=$serve_file 										\
+		HTTP_REQUEST_URL=$request_url								\
+		HTTP_REQUEST_URL_PARAMS=$(declare -p request_url_params)	\
+		HTTP_REQUEST_TYPE=$request_type								\
+		HTTP_REQUEST_VERSION=$request_http_version					\
+		HTTP_REQUEST_HEADERS=$(declare -p request_headers)	 		\
+		HTTP_RESPONSE_HEADERS=$(declare -p response_headers)		\
+			$SHELL "$serve_file" > "$request_tmp_body"				\
 			3>"$request_tmp_to_source"
 		if [ -f "$request_tmp_to_source" ]; then
 			source "$request_tmp_to_source"

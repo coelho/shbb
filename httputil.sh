@@ -2,6 +2,8 @@ declare -r remote_ip=$HTTP_REMOTE_IP
 declare -r request_type=$HTTP_REQUEST_TYPE
 declare -r request_path=$HTTP_REQUEST_PATH
 declare -r request_http_version=$HTTP_REQUEST_VERSION
+declare -r request_url=$HTTP_REQUEST_URL
+eval $HTTP_REQUEST_URL_PARAMS
 eval $HTTP_REQUEST_HEADERS
 eval $HTTP_RESPONSE_HEADERS
 declare -A request_cookies
