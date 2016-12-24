@@ -31,7 +31,7 @@ db_insert() {
 	local uuid=""
 	if ! test "${db_cursor['uuid']+isset}"; then
 		uuid=`uuidgen`
-		db_cursor["uuid"]=uuid
+		db_cursor["uuid"]=$uuid
 	else
 		uuid=db_cursor["uuid"]
 	fi
